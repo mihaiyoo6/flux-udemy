@@ -1,0 +1,38 @@
+{
+  "name": "flux-udemy",
+  "version": "0.0.1",
+  "description": "BizList - udemy flux course",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mihaiyoo6/flux-udemy.git"
+  },
+  "keywords": [
+    "mihaiyoo6",
+    "facebook",
+    "flux",
+    "react.",
+    "gulp"
+  ],
+  "author": "Mihai Mijea",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mihaiyoo6/flux-udemy/issues"
+  },
+  "homepage": "https://github.com/mihaiyoo6/flux-udemy#readme",
+  "devDependencies": {
+    "browserify": "^12.0.1",
+    "flux": "^2.1.1",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-sass": "^2.1.0",
+    "object-assign": "^4.0.1",
+    "react": "^0.14.3",
+    "react-dom": "^0.14.3",
+    "reactify": "^1.1.1",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
