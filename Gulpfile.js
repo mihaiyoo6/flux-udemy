@@ -23,6 +23,7 @@ gulp.task('copy', function(){
 //Saas task
 gulp.task('sass', function(){
 	gulp.src('src/scss/*.scss')
+		.pipe(sass())
 		.pipe(gulp.dest('app/css'));
 });
 

@@ -1,3 +1,5 @@
 module.exports = {
-	
+		RECEIVE_ITEMS: 'RECEIVE_ITEMS',
+		NEW_ITEM: 'NEW_ITEM',
+		CANCEL_ITEM: 'CANCEL_ITEM'
 };
