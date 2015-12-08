@@ -10,7 +10,9 @@ var React = require('react'),
 function getAppState(){
 	return{
 		businesses: BusinessStore.getBusinesses().list,
-		mainState: BusinessStore.getBusinesses().mainState
+		mainState: BusinessStore.getBusinesses().mainState,
+		showExtended: BusinessStore.getBusinesses().showExtended,
+		selectedId: BusinessStore.getBusinesses().selectedId
 	}
 }
 
@@ -28,7 +30,7 @@ var App = React.createClass({
 		if(this.state.mainState === 'new'){
 			var form = <BusinessFormNew />;
 		}else if(this.state.mainState === 'list'){
-			var list = <BusinessList businesses={this.state.businesses}/>;
+			var list = <BusinessList businesses={this.state.businesses} showExtended={this.state.showExtended} selectedId={this.state.selectedId}/>;
 		}else if(this.state.mainState === 'edit'){
 			var form = <BusinessFormEdit />;
 		}

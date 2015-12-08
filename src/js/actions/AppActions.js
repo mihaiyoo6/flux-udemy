@@ -17,6 +17,14 @@ var AppActions = {
 		AppDispatcher.handleViewAction({
 			actionType: AppConstants.CANCEL_ITEM
 		});
+	},
+	extendItem: function(itemId){
+		console.log('AppActions.js');
+		console.log(itemId);
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.EXTEND_ITEM,
+			itemId: itemId
+		});
 	}
 };
 module.exports = AppActions;

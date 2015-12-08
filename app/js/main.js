@@ -19675,6 +19675,14 @@ var AppActions = {
 		AppDispatcher.handleViewAction({
 			actionType: AppConstants.CANCEL_ITEM
 		});
+	},
+	extendItem: function(itemId){
+		console.log('AppActions.js');
+		console.log(itemId);
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.EXTEND_ITEM,
+			itemId: itemId
+		});
 	}
 };
 module.exports = AppActions;
@@ -19692,7 +19700,9 @@ var React = require('react'),
 function getAppState(){
 	return{
 		businesses: BusinessStore.getBusinesses().list,
-		mainState: BusinessStore.getBusinesses().mainState
+		mainState: BusinessStore.getBusinesses().mainState,
+		showExtended: BusinessStore.getBusinesses().showExtended,
+		selectedId: BusinessStore.getBusinesses().selectedId
 	}
 }
 
@@ -19710,7 +19720,7 @@ var App = React.createClass({displayName: "App",
 		if(this.state.mainState === 'new'){
 			var form = React.createElement(BusinessFormNew, null);
 		}else if(this.state.mainState === 'list'){
-			var list = React.createElement(BusinessList, {businesses: this.state.businesses});
+			var list = React.createElement(BusinessList, {businesses: this.state.businesses, showExtended: this.state.showExtended, selectedId: this.state.selectedId});
 		}else if(this.state.mainState === 'edit'){
 			var form = React.createElement(BusinessFormEdit, null);
 		}
@@ -19742,12 +19752,60 @@ var React = require('react'),
 
 var Business = React.createClass({displayName: "Business",
 	render: function(){
+		var businessExtended;
+		if(this.props.showExtended && this.props.selectedId == this.props.businessInfo.id){
+			businessExtended = React.createElement(BusinessExtended, {businessInfo: this.props.businessInfo})
+		}else{
+			businessExtended = '';
+		}
 		return (
 			React.createElement("div", {className: "well"}, 
+				React.createElement("button", {onClick: this.handleMoreClick.bind(this, this.props.businessInfo.id), className: "btn btn-default pull-right"}, "Show more"), 
 				React.createElement("h3", null, this.props.businessInfo.name), 
-				React.createElement("small", null, "Category: ", this.props.businessInfo.category)
+				React.createElement("small", null, "Category: ", this.props.businessInfo.category), 
+				businessExtended
 			)
 		);
+	},
+	handleMoreClick: function(i, j){
+		console.log('handleMoreClick');
+		console.log(i);
+		AppActions.extendItem(i);
+	}
+});
+
+var BusinessExtended = React.createClass({displayName: "BusinessExtended",
+	render: function(){
+		return(
+			React.createElement("div", {className: "row"}, 
+				React.createElement("hr", null), 
+				React.createElement("div", {className: "col-md-6"}, 
+					React.createElement("h3", null, "Location"), 
+					React.createElement("ul", {className: "list-group"}, 
+						React.createElement("li", {className: "list-group-item"}, this.props.businessInfo.address.street), 
+						React.createElement("li", {className: "list-group-item"}, this.props.businessInfo.address.city, ", ", this.props.businessInfo.address.state, ", ", this.props.businessInfo.address.zipcode)
+					), 
+					React.createElement("a", {className: "btn btn-primary btn-block", href: "#"}, "Email Us")
+				), 
+				React.createElement("div", {className: "col-md-6"}, 
+					React.createElement("h3", null, " About Us"), 
+					React.createElement("p", {className: "well"}, this.props.businessInfo.description)
+				), 
+				React.createElement("br", null), 
+				React.createElement("div", {className: "col-md-2 col-md-offset-10"}, 
+					React.createElement("div", {className: "btn-group btn-group", role: "group", "aria-label": "Large button group"}, 
+						React.createElement("button", {type: "button", className: "btn btn-primary", onClick: this.handleEditClick.bind(this, this.props.businessInfo.id)}, "Edit"), 
+						React.createElement("button", {type: "button", className: "btn btn-danger", onClick: this.handleRemoveClick.bind(this, this.props.businessInfo.id)}, "Delete")
+					)
+				)
+			)
+		);
+	},
+	handleEditClick: function(i, j){
+
+	},
+	handleRemoveClick: function(i, j){
+
 	}
 });
 
@@ -19847,10 +19905,12 @@ var BusinessList = React.createClass({displayName: "BusinessList",
 	render: function(){
 		
 		var businessNodes;
+		var showExtended=this.props.showExtended;
+		var selectedId=this.props.selectedId;
 		if(this.props.businesses){
 			businessNodes = this.props.businesses.map(function(business, index){
 				return(
-					React.createElement(Business, {businessInfo: business, key: index})
+					React.createElement(Business, {businessInfo: business, key: index, showExtended: showExtended, selectedId: selectedId})
 				);
 			});
 		}else{
@@ -19921,7 +19981,8 @@ module.exports = NavBar;
 module.exports = {
 		RECEIVE_ITEMS: 'RECEIVE_ITEMS',
 		NEW_ITEM: 'NEW_ITEM',
-		CANCEL_ITEM: 'CANCEL_ITEM'
+		CANCEL_ITEM: 'CANCEL_ITEM',
+		EXTEND_ITEM: 'EXTEND_ITEM'
 };
 
 },{}],172:[function(require,module,exports){
@@ -20011,7 +20072,9 @@ var CHANGE_EVENT = 'change';
 // Define Store
 var _businesses = {
 	list:[],
-	mainState: 'list'
+	mainState: 'list',
+	showExtended: false,
+	selectedId: false,
 }
 
 var BusinessStore = assign({}, EventEmitter.prototype, {
@@ -20044,6 +20107,11 @@ AppDispatcher.register(function(payload){
 			break;
 		case AppConstants.NEW_ITEM:
 			_businesses.mainState = 'new';
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.EXTEND_ITEM:
+			_businesses.showExtended = true;
+			_businesses.selectedId = action.itemId;
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
 	}

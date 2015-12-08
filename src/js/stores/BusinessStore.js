@@ -9,7 +9,9 @@ var CHANGE_EVENT = 'change';
 // Define Store
 var _businesses = {
 	list:[],
-	mainState: 'list'
+	mainState: 'list',
+	showExtended: false,
+	selectedId: false,
 }
 
 var BusinessStore = assign({}, EventEmitter.prototype, {
@@ -42,6 +44,11 @@ AppDispatcher.register(function(payload){
 			break;
 		case AppConstants.NEW_ITEM:
 			_businesses.mainState = 'new';
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.EXTEND_ITEM:
+			_businesses.showExtended = true;
+			_businesses.selectedId = action.itemId;
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
 	}
