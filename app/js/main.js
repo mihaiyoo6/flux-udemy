@@ -19683,6 +19683,30 @@ var AppActions = {
 			actionType: AppConstants.EXTEND_ITEM,
 			itemId: itemId
 		});
+	},
+	saveItem: function(item){
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.SAVE_ITEM,
+			item: item
+		});
+	},
+	removeItem: function(itemId){
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.REMOVE_ITEM,
+			itemId: itemId
+		});
+	},
+	editItem: function(itemId){
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.EDIT_ITEM,
+			itemId: itemId
+		});
+	},
+	receiveItem: function(item){
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.RECEIVE_ITEM,
+			item: item
+		});
 	}
 };
 module.exports = AppActions;
@@ -19702,7 +19726,8 @@ function getAppState(){
 		businesses: BusinessStore.getBusinesses().list,
 		mainState: BusinessStore.getBusinesses().mainState,
 		showExtended: BusinessStore.getBusinesses().showExtended,
-		selectedId: BusinessStore.getBusinesses().selectedId
+		selectedId: BusinessStore.getBusinesses().selectedId,
+		selected: BusinessStore.getBusinesses().selected
 	}
 }
 
@@ -19722,7 +19747,7 @@ var App = React.createClass({displayName: "App",
 		}else if(this.state.mainState === 'list'){
 			var list = React.createElement(BusinessList, {businesses: this.state.businesses, showExtended: this.state.showExtended, selectedId: this.state.selectedId});
 		}else if(this.state.mainState === 'edit'){
-			var form = React.createElement(BusinessFormEdit, null);
+			var form = React.createElement(BusinessFormEdit, {selectedId: this.state.selectedId, selected: this.state.selected});
 		}
 		return(
 			React.createElement("div", {className: "wrapper"}, 
@@ -19802,10 +19827,10 @@ var BusinessExtended = React.createClass({displayName: "BusinessExtended",
 		);
 	},
 	handleEditClick: function(i, j){
-
+		AppActions.editItem(i);
 	},
 	handleRemoveClick: function(i, j){
-
+		AppActions.removeItem(i);
 	}
 });
 
@@ -19818,9 +19843,64 @@ var React = require('react'),
 	Business = require('./Business');
 
 var BusinessFormEdit = React.createClass({displayName: "BusinessFormEdit",
+	componentDidMount: function() {
+		BusinessStore.getBusiness(this.props.selectedId);
+	},
 	render: function(){
+		console.log(this.props.selected);
 		return (
-			React.createElement("div", null, "BusinessFormEdit")
+			React.createElement("div", {className: "well"}, 
+				React.createElement("h3", null, "Edit a Business"), 
+	        	React.createElement("form", {onSubmit: this.handleSubmit}, 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "item.name"}, "Business Name"), 
+				    React.createElement("input", {type: "text", ref: "name", className: "form-control", value: this.props.selected.name, placeholder: "Business Name"})
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "category"}, "Category"), 
+				    React.createElement("select", {ref: "category", className: "form-control", value: this.props.selected.category}, 
+				    	React.createElement("option", {value: "0", disabled: true}, "Select Category"), 
+				    	React.createElement("option", {value: "Construction"}, "Construction"), 
+				    	React.createElement("option", {value: "Food"}, "Food"), 
+				    	React.createElement("option", {value: "Fashion"}, "Fashion"), 
+				    	React.createElement("option", {value: "Finance"}, "Finance"), 
+				    	React.createElement("option", {value: "Retail"}, "Retail"), 
+				    	React.createElement("option", {value: "Technology"}, "Technology"), 
+				    	React.createElement("option", {value: "Other"}, "Other")
+				    )
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "street_address"}, "Street Address"), 
+				    React.createElement("input", {type: "text", ref: "street", className: "form-control", value: this.props.selected.address.street, placeholder: "Street Address"})
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "city"}, "City"), 
+				    React.createElement("input", {type: "text", ref: "city", className: "form-control", value: this.props.selected.address.city, placeholder: "City"})
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "state"}, "State"), 
+				    React.createElement("input", {type: "text", ref: "state", className: "form-control", value: this.props.selected.address.state, placeholder: "State"})
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "zipcode"}, "Zipcode"), 
+				    React.createElement("input", {type: "text", ref: "zipcode", className: "form-control", value: this.props.selected.address.zipcode, placeholder: "Zipcode"})
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "phone"}, "Phone Number"), 
+				    React.createElement("input", {type: "text", ref: "phone", className: "form-control", value: this.props.selected.phone, placeholder: "Phone Number"})
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "email"}, "Email"), 
+				    React.createElement("input", {type: "email", ref: "email", className: "form-control", value: this.props.selected.email, placeholder: "Email"})
+				  ), 
+				  React.createElement("div", {className: "form-group"}, 
+				    React.createElement("label", {htmlFor: "description"}, "Description"), 
+				    React.createElement("textarea", {ref: "description", className: "form-control", value: this.props.selected.description, placeholder: "Description"})
+				  ), 
+				   
+				  React.createElement("button", {type: "submit", className: "btn btn-primary"}, "Submit")
+				)
+			)
 		);
 	}
 });
@@ -19890,6 +19970,23 @@ var BusinessFormNew = React.createClass({displayName: "BusinessFormNew",
 				)
 			)
 		);
+	},
+	handleSubmit: function(){
+		event.preventDefault();
+		var item ={
+			name: this.refs.name.value.trim(),
+			category: this.refs.category.value.trim(),
+			address:{
+				street: this.refs.street.value.trim(),
+				city: this.refs.city.value.trim(),
+				state: this.refs.state.value.trim(),
+				zipcode: this.refs.zipcode.value.trim()
+			},
+			phone: this.refs.phone.value.trim(),
+			email: this.refs.email.value.trim(),
+			description: this.refs.description.value.trim()
+		};
+		AppActions.saveItem(item);
 	}
 });
 
@@ -19982,7 +20079,11 @@ module.exports = {
 		RECEIVE_ITEMS: 'RECEIVE_ITEMS',
 		NEW_ITEM: 'NEW_ITEM',
 		CANCEL_ITEM: 'CANCEL_ITEM',
-		EXTEND_ITEM: 'EXTEND_ITEM'
+		EXTEND_ITEM: 'EXTEND_ITEM',
+		SAVE_ITEM: 'SAVE_ITEM',
+		REMOVE_ITEM: 'REMOVE_ITEM',
+		EDIT_ITEM: 'EDIT_ITEM',
+		RECEIVE_ITEM: 'RECEIVE_ITEM'
 };
 
 },{}],172:[function(require,module,exports){
@@ -20009,7 +20110,7 @@ var React = require('react'),
 	AppAPI = require('./utils/AppAPI');
 
 
-if(localStorage.getItem('business') == null){
+if(localStorage.getItem('businesses') == null){
 	StartData.init();
 }
 
@@ -20075,11 +20176,28 @@ var _businesses = {
 	mainState: 'list',
 	showExtended: false,
 	selectedId: false,
+	selected:{
+		id: '',
+		name: '',
+		category: '',
+		address:{
+			street: '',
+			city: '',
+			state: '',
+			zipcode: ''
+		},
+		phone:'',
+		email: '',
+		description: ''
+	}
 }
 
 var BusinessStore = assign({}, EventEmitter.prototype, {
 	getBusinesses: function(){
 		return _businesses;
+	},
+	getBusiness: function(id){
+		AppAPI.getItem(id);
 	},
 	emitChange: function(){
 		this.emit(CHANGE_EVENT);
@@ -20089,6 +20207,14 @@ var BusinessStore = assign({}, EventEmitter.prototype, {
 	},
 	removeChangeListener: function(callback){
 		this.removeListener('change', callback);
+	},
+	generateId: function(){
+		var id = '';
+		var possible = '0123456789';
+		for(var i = 0; i < 5; i++){
+			id += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+		return id;
 	}
 });
 
@@ -20114,6 +20240,33 @@ AppDispatcher.register(function(payload){
 			_businesses.selectedId = action.itemId;
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
+		case AppConstants.SAVE_ITEM:
+			console.log('save item...');
+			action.item.id = BusinessStore.generateId();
+
+			AppAPI.saveItem(action.item);
+			_businesses.list.push(item);
+			_businesses.mainState = 'list';
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.REMOVE_ITEM:
+			console.log('remove item...');
+			var index = _businesses.list.findIndex( x => x.id === action.itemId);
+			_businesses.list.splice(index, 1);
+			AppAPI.removeItem(action.itemId);
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.EDIT_ITEM:
+			console.log('edit item...');
+			_businesses.mainState = 'edit';
+			_businesses.selectedId = action.itemId;
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.RECEIVE_ITEM:
+			console.log('receive item...');
+			_businesses.selected = action.item;
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
 	}
 
 	return true;
@@ -20130,6 +20283,31 @@ module.exports = {
 		//simulates callback
 		AppActions.receiveItems(items);
 	},
+	saveItem: function(item){
+		console.log(item);
+		var items = JSON.parse(localStorage.getItem('businesses'));
+		items.push(item);
+		console.log(items);
+		localStorage.setItem('businesses', JSON.stringify(items));
+		console.log(JSON.parse(localStorage.getItem('businesses')));
+	},
+	removeItem: function(itemId){
+		var items = JSON.parse(localStorage.getItem('businesses'));
+		for(var i = 0; i < items.length; i++){
+			if(items[i].id === itemId){
+				items.splice(i, 1);
+			}
+		}
+		localStorage.setItem('businesses', JSON.stringify(items));
+	},
+	getItem: function(itemId){
+		var items = JSON.parse(localStorage.getItem('businesses'));
+		for(var i = 0; i < items.length; i++){
+			if(items[i].id === itemId){
+				AppActions.receiveItem(items[i]);
+			}
+		}
+	}
 }
 
 },{"../actions/AppActions":164}]},{},[173]);

@@ -54,10 +54,10 @@ var BusinessExtended = React.createClass({
 		);
 	},
 	handleEditClick: function(i, j){
-
+		AppActions.editItem(i);
 	},
 	handleRemoveClick: function(i, j){
-
+		AppActions.removeItem(i);
 	}
 });
 

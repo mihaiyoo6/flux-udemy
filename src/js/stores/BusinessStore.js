@@ -12,11 +12,28 @@ var _businesses = {
 	mainState: 'list',
 	showExtended: false,
 	selectedId: false,
+	selected:{
+		id: '',
+		name: '',
+		category: '',
+		address:{
+			street: '',
+			city: '',
+			state: '',
+			zipcode: ''
+		},
+		phone:'',
+		email: '',
+		description: ''
+	}
 }
 
 var BusinessStore = assign({}, EventEmitter.prototype, {
 	getBusinesses: function(){
 		return _businesses;
+	},
+	getBusiness: function(id){
+		AppAPI.getItem(id);
 	},
 	emitChange: function(){
 		this.emit(CHANGE_EVENT);
@@ -26,6 +43,14 @@ var BusinessStore = assign({}, EventEmitter.prototype, {
 	},
 	removeChangeListener: function(callback){
 		this.removeListener('change', callback);
+	},
+	generateId: function(){
+		var id = '';
+		var possible = '0123456789';
+		for(var i = 0; i < 5; i++){
+			id += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+		return id;
 	}
 });
 
@@ -49,6 +74,33 @@ AppDispatcher.register(function(payload){
 		case AppConstants.EXTEND_ITEM:
 			_businesses.showExtended = true;
 			_businesses.selectedId = action.itemId;
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.SAVE_ITEM:
+			console.log('save item...');
+			action.item.id = BusinessStore.generateId();
+
+			AppAPI.saveItem(action.item);
+			_businesses.list.push(item);
+			_businesses.mainState = 'list';
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.REMOVE_ITEM:
+			console.log('remove item...');
+			var index = _businesses.list.findIndex( x => x.id === action.itemId);
+			_businesses.list.splice(index, 1);
+			AppAPI.removeItem(action.itemId);
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.EDIT_ITEM:
+			console.log('edit item...');
+			_businesses.mainState = 'edit';
+			_businesses.selectedId = action.itemId;
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.RECEIVE_ITEM:
+			console.log('receive item...');
+			_businesses.selected = action.item;
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
 	}

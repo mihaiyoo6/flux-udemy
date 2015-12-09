@@ -12,7 +12,8 @@ function getAppState(){
 		businesses: BusinessStore.getBusinesses().list,
 		mainState: BusinessStore.getBusinesses().mainState,
 		showExtended: BusinessStore.getBusinesses().showExtended,
-		selectedId: BusinessStore.getBusinesses().selectedId
+		selectedId: BusinessStore.getBusinesses().selectedId,
+		selected: BusinessStore.getBusinesses().selected
 	}
 }
 
@@ -32,7 +33,7 @@ var App = React.createClass({
 		}else if(this.state.mainState === 'list'){
 			var list = <BusinessList businesses={this.state.businesses} showExtended={this.state.showExtended} selectedId={this.state.selectedId}/>;
 		}else if(this.state.mainState === 'edit'){
-			var form = <BusinessFormEdit />;
+			var form = <BusinessFormEdit selectedId={this.state.selectedId} selected={this.state.selected} />;
 		}
 		return(
 			<div className="wrapper">

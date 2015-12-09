@@ -5,7 +5,7 @@ var React = require('react'),
 	AppAPI = require('./utils/AppAPI');
 
 
-if(localStorage.getItem('business') == null){
+if(localStorage.getItem('businesses') == null){
 	StartData.init();
 }
 
