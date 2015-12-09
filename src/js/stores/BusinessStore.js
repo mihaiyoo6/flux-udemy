@@ -81,13 +81,14 @@ AppDispatcher.register(function(payload){
 			action.item.id = BusinessStore.generateId();
 
 			AppAPI.saveItem(action.item);
-			_businesses.list.push(item);
+			_businesses.list.push(action.item);
 			_businesses.mainState = 'list';
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
 		case AppConstants.REMOVE_ITEM:
 			console.log('remove item...');
 			var index = _businesses.list.findIndex( x => x.id === action.itemId);
+			console.log(index);
 			_businesses.list.splice(index, 1);
 			AppAPI.removeItem(action.itemId);
 			BusinessStore.emit(CHANGE_EVENT);
@@ -101,6 +102,16 @@ AppDispatcher.register(function(payload){
 		case AppConstants.RECEIVE_ITEM:
 			console.log('receive item...');
 			_businesses.selected = action.item;
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.UPDATE_ITEM:
+			console.log('Update item...');
+			var index = _businesses.list.findIndex( x => x.id === action.itemId);
+			console.log(index);
+			_businesses.list.splice(index, 1);
+			AppAPI.updateItem(action.item);
+			_businesses.list.push(action.item);
+			_businesses.mainState = 'list';
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
 	}

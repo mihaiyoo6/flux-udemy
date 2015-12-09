@@ -19707,7 +19707,13 @@ var AppActions = {
 			actionType: AppConstants.RECEIVE_ITEM,
 			item: item
 		});
-	}
+	},
+	updateItem: function(item){
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.UPDATE_ITEM,
+			item: item
+		});
+	},
 };
 module.exports = AppActions;
 
@@ -19747,7 +19753,7 @@ var App = React.createClass({displayName: "App",
 		}else if(this.state.mainState === 'list'){
 			var list = React.createElement(BusinessList, {businesses: this.state.businesses, showExtended: this.state.showExtended, selectedId: this.state.selectedId});
 		}else if(this.state.mainState === 'edit'){
-			var form = React.createElement(BusinessFormEdit, {selectedId: this.state.selectedId, selected: this.state.selected});
+			var form = React.createElement(BusinessFormEdit, {selectedId: this.state.selectedId, selected: this.state.selected, callBackParent: this.onEditChange});
 		}
 		return(
 			React.createElement("div", {className: "wrapper"}, 
@@ -19765,6 +19771,18 @@ var App = React.createClass({displayName: "App",
 	},
 	_onChange: function(){
 		this.setState(getAppState());
+	},
+	onEditChange: function(newState, fieldName){
+		var selected = this.state.selected;
+		if(fieldName.indexOf('.') !== -1){
+			var values = fieldName.split('.');
+			selected[values[0]][values[1]] = newState;
+		}else{
+			selected[fieldName] = newState;
+		}
+		this.setState({
+			selected: selected
+		});
 	}
 });
 
@@ -19854,7 +19872,7 @@ var BusinessFormEdit = React.createClass({displayName: "BusinessFormEdit",
 	        	React.createElement("form", {onSubmit: this.handleSubmit}, 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "item.name"}, "Business Name"), 
-				    React.createElement("input", {type: "text", ref: "name", className: "form-control", value: this.props.selected.name, placeholder: "Business Name"})
+				    React.createElement("input", {type: "text", ref: "name", className: "form-control", onChange: this.handleChange.bind(this, 'name'), value: this.props.selected.name, placeholder: "Business Name"})
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "category"}, "Category"), 
@@ -19871,37 +19889,64 @@ var BusinessFormEdit = React.createClass({displayName: "BusinessFormEdit",
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "street_address"}, "Street Address"), 
-				    React.createElement("input", {type: "text", ref: "street", className: "form-control", value: this.props.selected.address.street, placeholder: "Street Address"})
+				    React.createElement("input", {type: "text", ref: "street", className: "form-control", onChange: this.handleChange.bind(this, 'address.street'), value: this.props.selected.address.street, placeholder: "Street Address"})
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "city"}, "City"), 
-				    React.createElement("input", {type: "text", ref: "city", className: "form-control", value: this.props.selected.address.city, placeholder: "City"})
+				    React.createElement("input", {type: "text", ref: "city", className: "form-control", onChange: this.handleChange.bind(this, 'address.city'), value: this.props.selected.address.city, placeholder: "City"})
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "state"}, "State"), 
-				    React.createElement("input", {type: "text", ref: "state", className: "form-control", value: this.props.selected.address.state, placeholder: "State"})
+				    React.createElement("input", {type: "text", ref: "state", className: "form-control", onChange: this.handleChange.bind(this, 'address.state'), value: this.props.selected.address.state, placeholder: "State"})
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "zipcode"}, "Zipcode"), 
-				    React.createElement("input", {type: "text", ref: "zipcode", className: "form-control", value: this.props.selected.address.zipcode, placeholder: "Zipcode"})
+				    React.createElement("input", {type: "text", ref: "zipcode", className: "form-control", onChange: this.handleChange.bind(this, 'address.zipcode'), value: this.props.selected.address.zipcode, placeholder: "Zipcode"})
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "phone"}, "Phone Number"), 
-				    React.createElement("input", {type: "text", ref: "phone", className: "form-control", value: this.props.selected.phone, placeholder: "Phone Number"})
+				    React.createElement("input", {type: "text", ref: "phone", className: "form-control", onChange: this.handleChange.bind(this, 'phone'), value: this.props.selected.phone, placeholder: "Phone Number"})
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "email"}, "Email"), 
-				    React.createElement("input", {type: "email", ref: "email", className: "form-control", value: this.props.selected.email, placeholder: "Email"})
+				    React.createElement("input", {type: "email", ref: "email", className: "form-control", onChange: this.handleChange.bind(this, 'email'), value: this.props.selected.email, placeholder: "Email"})
 				  ), 
 				  React.createElement("div", {className: "form-group"}, 
 				    React.createElement("label", {htmlFor: "description"}, "Description"), 
-				    React.createElement("textarea", {ref: "description", className: "form-control", value: this.props.selected.description, placeholder: "Description"})
+				    React.createElement("textarea", {ref: "description", className: "form-control", value: this.props.selected.description, onChange: this.handleChange.bind(this, 'description'), placeholder: "Description"})
 				  ), 
 				   
 				  React.createElement("button", {type: "submit", className: "btn btn-primary"}, "Submit")
 				)
 			)
 		);
+	},
+	handleChange: function(fieldName, event){
+		var newState = event.target.value;
+		// var selected = this.state.selected;
+		// selected.name = newState;
+		// this.setState({
+		// 	selected: selected
+		// });
+		this.props.callBackParent(newState, fieldName);
+	},
+	handleSubmit:function(){
+		event.preventDefault();
+		var item ={
+			id: this.props.selected.id,
+			name: this.refs.name.value.trim(),
+			category: this.refs.category.value.trim(),
+			address:{
+				street: this.refs.street.value.trim(),
+				city: this.refs.city.value.trim(),
+				state: this.refs.state.value.trim(),
+				zipcode: this.refs.zipcode.value.trim()
+			},
+			phone: this.refs.phone.value.trim(),
+			email: this.refs.email.value.trim(),
+			description: this.refs.description.value.trim()
+		};
+		AppActions.updateItem(item);
 	}
 });
 
@@ -20083,7 +20128,8 @@ module.exports = {
 		SAVE_ITEM: 'SAVE_ITEM',
 		REMOVE_ITEM: 'REMOVE_ITEM',
 		EDIT_ITEM: 'EDIT_ITEM',
-		RECEIVE_ITEM: 'RECEIVE_ITEM'
+		RECEIVE_ITEM: 'RECEIVE_ITEM',
+		UPDATE_ITEM: 'UPDATE_ITEM'
 };
 
 },{}],172:[function(require,module,exports){
@@ -20245,13 +20291,14 @@ AppDispatcher.register(function(payload){
 			action.item.id = BusinessStore.generateId();
 
 			AppAPI.saveItem(action.item);
-			_businesses.list.push(item);
+			_businesses.list.push(action.item);
 			_businesses.mainState = 'list';
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
 		case AppConstants.REMOVE_ITEM:
 			console.log('remove item...');
 			var index = _businesses.list.findIndex( x => x.id === action.itemId);
+			console.log(index);
 			_businesses.list.splice(index, 1);
 			AppAPI.removeItem(action.itemId);
 			BusinessStore.emit(CHANGE_EVENT);
@@ -20265,6 +20312,16 @@ AppDispatcher.register(function(payload){
 		case AppConstants.RECEIVE_ITEM:
 			console.log('receive item...');
 			_businesses.selected = action.item;
+			BusinessStore.emit(CHANGE_EVENT);
+			break;
+		case AppConstants.UPDATE_ITEM:
+			console.log('Update item...');
+			var index = _businesses.list.findIndex( x => x.id === action.itemId);
+			console.log(index);
+			_businesses.list.splice(index, 1);
+			AppAPI.updateItem(action.item);
+			_businesses.list.push(action.item);
+			_businesses.mainState = 'list';
 			BusinessStore.emit(CHANGE_EVENT);
 			break;
 	}
@@ -20307,7 +20364,17 @@ module.exports = {
 				AppActions.receiveItem(items[i]);
 			}
 		}
-	}
+	},
+	updateItem: function(item){
+		var items = JSON.parse(localStorage.getItem('businesses'));
+		for(var i = 0; i < items.length; i++){
+			if(items[i].id === item.id){
+				items.splice(i, 1);
+				// items.push(item);
+			}
+		}
+		localStorage.setItem('businesses', JSON.stringify(items));
+	},
 }
 
 },{"../actions/AppActions":164}]},{},[173]);

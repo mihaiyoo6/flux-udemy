@@ -49,6 +49,12 @@ var AppActions = {
 			actionType: AppConstants.RECEIVE_ITEM,
 			item: item
 		});
-	}
+	},
+	updateItem: function(item){
+		AppDispatcher.handleViewAction({
+			actionType: AppConstants.UPDATE_ITEM,
+			item: item
+		});
+	},
 };
 module.exports = AppActions;

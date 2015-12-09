@@ -33,7 +33,7 @@ var App = React.createClass({
 		}else if(this.state.mainState === 'list'){
 			var list = <BusinessList businesses={this.state.businesses} showExtended={this.state.showExtended} selectedId={this.state.selectedId}/>;
 		}else if(this.state.mainState === 'edit'){
-			var form = <BusinessFormEdit selectedId={this.state.selectedId} selected={this.state.selected} />;
+			var form = <BusinessFormEdit selectedId={this.state.selectedId} selected={this.state.selected} callBackParent={this.onEditChange} />;
 		}
 		return(
 			<div className="wrapper">
@@ -51,6 +51,18 @@ var App = React.createClass({
 	},
 	_onChange: function(){
 		this.setState(getAppState());
+	},
+	onEditChange: function(newState, fieldName){
+		var selected = this.state.selected;
+		if(fieldName.indexOf('.') !== -1){
+			var values = fieldName.split('.');
+			selected[values[0]][values[1]] = newState;
+		}else{
+			selected[fieldName] = newState;
+		}
+		this.setState({
+			selected: selected
+		});
 	}
 });
 
